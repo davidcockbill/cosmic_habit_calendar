@@ -29,8 +29,9 @@ ORANGE = graphics.create_pen(255, 102, 0)
 LIGHT_GREY = graphics.create_pen(20, 20, 20)
 
 ON = BLUE
-CURRENT_DAY = PINK
 OFF = LIGHT_GREY
+TODAY_ON = GREEN
+TODAY_OFF = PINK
 MATRIX_BORDER = DARK_BLUE
 BACKGROUND = graphics.create_pen(0, 0, 10)
 
@@ -87,19 +88,17 @@ def display_date_matrix():
 
     # Matrix
     for month in DateMatrix.month_range():
-        for day in DateMatrix.day_range(month):
-            column = day
-            if (date_matrix.isSet(month, day)):
-                print(f'current_month={current_month}, current_day={current_day}')
-                print(f'month={month}, day={day}')
-                pen = CURRENT_DAY if day == current_day-1 and month == current_month-1 else ON
-                graphics.set_pen(pen)
-            else:
-                graphics.set_pen(OFF)
-            graphics.pixel(column, row)
-        # Last pixel in row
         graphics.set_pen(OFF)
-        graphics.pixel(31, row)
+        graphics.line(0, row, 32, row)
+        for day in DateMatrix.day_range(month):
+            today = day == current_day-1 and month == current_month-1
+            column = day
+            pen = TODAY_OFF if today else OFF
+            if (date_matrix.isSet(month, day)):
+                pen = TODAY_ON if today else ON
+            graphics.set_pen(pen)
+            graphics.pixel(column, row)
+
         row += 1
 
     # Bottom Border 
