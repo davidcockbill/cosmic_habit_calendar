@@ -23,25 +23,30 @@ WHITE = graphics.create_pen(255, 255, 255)
 BLACK = graphics.create_pen(0, 0, 0)
 BLUE = graphics.create_pen(0, 0, 255)
 DARK_BLUE = graphics.create_pen(0, 0, 20)
+GREEN = graphics.create_pen(0, 255, 0)
+PINK = graphics.create_pen(255, 20, 147)
 ORANGE = graphics.create_pen(255, 102, 0)
 LIGHT_GREY = graphics.create_pen(20, 20, 20)
 
 ON = BLUE
+CURRENT_DAY = PINK
 OFF = LIGHT_GREY
 MATRIX_BORDER = DARK_BLUE
 BACKGROUND = graphics.create_pen(0, 0, 10)
 
 
 def sync_time():
+    global last_timestamp
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(WIFI_SSID, WIFI_PASSWORD)
 
-    connection_check_duration = 500
+    connection_check_duration = 100
     retry = 0
     while True:
         timestamp = time.ticks_ms()
         if timestamp - last_timestamp > connection_check_duration:
+            last_timestamp = timestamp
             if wlan.status() < 0 or wlan.status() >= 3:
                 break
             print(f'[{retry}] Waiting for wifi connection...')
@@ -72,6 +77,7 @@ def current_date():
 
 
 def display_date_matrix():
+    current_month, current_day = current_date()
     row = 15
 
     # Top Border
@@ -81,10 +87,13 @@ def display_date_matrix():
 
     # Matrix
     for month in DateMatrix.month_range():
-        for day in DateMatrix.day_range():
+        for day in DateMatrix.day_range(month):
             column = day
             if (date_matrix.isSet(month, day)):
-                graphics.set_pen(ON)
+                print(f'current_month={current_month}, current_day={current_day}')
+                print(f'month={month}, day={day}')
+                pen = CURRENT_DAY if day == current_day-1 and month == current_month-1 else ON
+                graphics.set_pen(pen)
             else:
                 graphics.set_pen(OFF)
             graphics.pixel(column, row)
@@ -158,7 +167,9 @@ def initialise():
     print(f'Initialising...')
     cu.set_brightness(0.8)
     graphics.set_font('bitmap8')
+    print(f'Restoring Matrix...')
     date_matrix.restore()
+    print(f'Matrix Restored')
     update_display()
     print(f'Initialised')
 

@@ -10,9 +10,9 @@ DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 def normalise_date(func):
     def wrapper(self, month, day):
         if month >= MAX_MONTH:
-            print(f'Invalid month={month}')
+            print(f'Invalid month [month={month}. day={day}]')
         elif day >= DAYS_IN_MONTH[month]:
-            print(f'Invalid day={day}')
+            print(f'Invalid day [month={month}. day={day}]')
         else:
             return func(self, month, day)
     return wrapper
@@ -50,8 +50,8 @@ class DateMatrix:
         return range(MAX_MONTH)
     
     @staticmethod
-    def day_range():
-        return range(MAX_DAY)
+    def day_range(month):
+        return range(DAYS_IN_MONTH[month])
     
     def store(self):
         with open(self.filename, 'w') as outfile:

@@ -2,6 +2,8 @@
 
 A Habit Calendar implemented on the [Pimoroni Cosmic Unicorn](https://shop.pimoroni.com/products/space-unicorns?variant=40842626596947)
 
+The Cosmic Unicorn [Schematic](https://cdn.shopify.com/s/files/1/0174/1800/files/cosmic_unicorn_schematic.pdf?v=1677236038).
+
 ## Development Environment
 
 I am using Visual Studio Code.
