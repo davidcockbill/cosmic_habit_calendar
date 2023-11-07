@@ -7,10 +7,11 @@ import ntptime
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 from date_matrix import DateMatrix
+from time_display import write_time
 from wifi import WIFI_SSID, WIFI_PASSWORD
 
 last_timestamp = time.ticks_ms()
-last_refresh = time.ticks_ms()
+last_refresh_minute = int(0)
 rtc = machine.RTC()
 cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
@@ -24,6 +25,7 @@ BLACK = graphics.create_pen(0, 0, 0)
 BLUE = graphics.create_pen(0, 0, 255)
 DARK_BLUE = graphics.create_pen(0, 0, 20)
 GREEN = graphics.create_pen(0, 255, 0)
+DARK_GREEN = graphics.create_pen(0, 80, 0)
 PINK = graphics.create_pen(255, 20, 147)
 ORANGE = graphics.create_pen(255, 102, 0)
 LIGHT_GREY = graphics.create_pen(20, 20, 20)
@@ -79,7 +81,7 @@ def current_date():
 
 def display_date_matrix():
     current_month, current_day = current_date()
-    row = 15
+    row = 18
 
     # Top Border
     graphics.set_pen(MATRIX_BORDER)
@@ -121,8 +123,15 @@ def display_date():
     date = f'{MONTHS[month-1]} {day:02}'
 
     graphics.set_pen(ORANGE)
-    graphics.text(date, 3, 4, scale=1, spacing=1)
+    graphics.text(date, 3, 2, scale=1, spacing=1)
     cu.update(graphics)
+
+
+def display_time():
+    global last_refresh_minute
+    _, _, _, _, hour, minute, _, _ = rtc.datetime()
+    write_time(graphics, DARK_GREEN, BACKGROUND, hour, minute, 7, 11)
+    last_refresh_minute = minute
 
 
 def toogle_day():
@@ -136,19 +145,20 @@ def toogle_day():
 def update_display():
     clear_display(BACKGROUND)
     display_date()
+    display_time()
     display_date_matrix()
     cu.update(graphics)
 
+
 def refresh_display():
-    global last_refresh
-    millis_in_hour = 3600000
-    current_ticks = time.ticks_ms()
-    if current_ticks - last_refresh > millis_in_hour:
-        last_refresh = current_ticks
+    global last_refresh_minute
+    _, _, _, _, _, current_minute, _, _ = rtc.datetime()
+    if current_minute != last_refresh_minute:
         update_display()
 
+
 def loop():
-    if debounce(CosmicUnicorn.SWITCH_D):
+    if debounce(CosmicUnicorn.SWITCH_A):
         toogle_day()
     
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
