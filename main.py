@@ -124,7 +124,6 @@ def display_date():
 
     graphics.set_pen(ORANGE)
     graphics.text(date, 3, 2, scale=1, spacing=1)
-    cu.update(graphics)
 
 
 def display_time():
