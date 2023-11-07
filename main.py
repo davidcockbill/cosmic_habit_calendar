@@ -10,7 +10,6 @@ from date_matrix import DateMatrix
 from time_display import write_time
 from wifi import WIFI_SSID, WIFI_PASSWORD
 
-last_timestamp = time.ticks_ms()
 last_refresh_minute = int(0)
 rtc = machine.RTC()
 cu = CosmicUnicorn()
@@ -39,12 +38,12 @@ BACKGROUND = graphics.create_pen(0, 0, 10)
 
 
 def sync_time():
-    global last_timestamp
+    last_timestamp = time.ticks_ms()
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(WIFI_SSID, WIFI_PASSWORD)
 
-    connection_check_duration = 100
+    connection_check_duration = 500
     retry = 0
     while True:
         timestamp = time.ticks_ms()
@@ -110,12 +109,13 @@ def display_date_matrix():
     cu.update(graphics)
 
 
-def debounce(button, duration=100):
-    global last_timestamp
-    if cu.is_pressed(button) and time.ticks_ms() - last_timestamp > duration:
-        last_timestamp = time.ticks_ms()
-        return True
-    return False
+def process_button(button):
+    initial_timestamp = time.ticks_ms()
+    if cu.is_pressed(button):
+        while cu.is_pressed(button):
+            time.sleep(0.01)
+    duration = time.ticks_ms() - initial_timestamp
+    return duration
 
 
 def display_date():
@@ -157,8 +157,12 @@ def refresh_display():
 
 
 def loop():
-    if debounce(CosmicUnicorn.SWITCH_A):
-        toggle_day()
+    duration = process_button(CosmicUnicorn.SWITCH_A)
+    if duration > 100:
+        if duration < 1000:
+            toggle_day()
+        else:
+            print(f'Long push {duration}')
     
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         cu.adjust_brightness(+0.1)
