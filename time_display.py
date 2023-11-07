@@ -96,8 +96,6 @@ def _draw_character(graphics, foreground, background, character, x_offset, y_off
     for y in range(len(sprite)):
         for x_idx, x in enumerate(reversed(range(4))):
             bit_set = (sprite[y] >> x) & 1 > 0
-            print(f'x={x}, y={y}, set=0x{sprite[y]:02x}, bit_value={bit_set}')
-            # bit_value = 1
             if bit_set :
                 graphics.set_pen(foreground)
             else:

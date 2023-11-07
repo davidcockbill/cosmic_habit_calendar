@@ -133,7 +133,7 @@ def display_time():
     last_refresh_minute = minute
 
 
-def toogle_day():
+def toggle_day():
     month, day = current_date()
     print(f'Setting month={month}, day={day}')
     date_matrix.toggle(month-1, day-1)
@@ -158,7 +158,7 @@ def refresh_display():
 
 def loop():
     if debounce(CosmicUnicorn.SWITCH_A):
-        toogle_day()
+        toggle_day()
     
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         cu.adjust_brightness(+0.1)
