@@ -6,35 +6,15 @@ import network
 import ntptime
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
-from date_matrix import DateMatrix
-from time_display import write_time
+from habit_calendar import HabitCalendar
+from color import Color
 from wifi import WIFI_SSID, WIFI_PASSWORD
 
-last_refresh_minute = int(0)
 rtc = machine.RTC()
 cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
-date_matrix = DateMatrix()
-
-
-MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-
-WHITE = graphics.create_pen(255, 255, 255)
-BLACK = graphics.create_pen(0, 0, 0)
-BLUE = graphics.create_pen(0, 0, 255)
-DARK_BLUE = graphics.create_pen(0, 0, 20)
-GREEN = graphics.create_pen(0, 255, 0)
-DARK_GREEN = graphics.create_pen(0, 80, 0)
-PINK = graphics.create_pen(255, 20, 147)
-ORANGE = graphics.create_pen(255, 102, 0)
-LIGHT_GREY = graphics.create_pen(20, 20, 20)
-
-ON = BLUE
-OFF = LIGHT_GREY
-TODAY_ON = GREEN
-TODAY_OFF = PINK
-MATRIX_BORDER = DARK_BLUE
-BACKGROUND = graphics.create_pen(0, 0, 10)
+color = Color(graphics)
+habit_calendar = HabitCalendar(graphics, cu, rtc)
 
 
 def sync_time():
@@ -54,7 +34,7 @@ def sync_time():
             print(f'[{retry}] Waiting for wifi connection...')
 
         brightness = [0.5, 0.4, 0.3, 0.2, 0.1, 0.2, 0.3, 0.4][retry%8]
-        display_wifi(brightness=brightness, foreground=BLUE)
+        display_wifi(brightness=brightness, foreground=color.blue())
         time.sleep(0.1)
         retry += 1
     print('Connected')
@@ -73,125 +53,12 @@ def sync_time():
     wlan.active(False)
 
 
-def current_date():
-    _, month, day, _, _, _, _, _ = rtc.datetime()
-    return month, day
-
-
-def display_date_matrix():
-    current_month, current_day = current_date()
-    row = 18
-
-    # Top Border
-    graphics.set_pen(MATRIX_BORDER)
-    graphics.line(0, row, 32, row)
-    row += 1
-
-    # Matrix
-    for month in DateMatrix.month_range():
-        graphics.set_pen(OFF)
-        graphics.line(0, row, 32, row)
-        for day in DateMatrix.day_range(month):
-            today = day == current_day-1 and month == current_month-1
-            column = day
-            pen = TODAY_OFF if today else OFF
-            if (date_matrix.isSet(month, day)):
-                pen = TODAY_ON if today else ON
-            graphics.set_pen(pen)
-            graphics.pixel(column, row)
-
-        row += 1
-
-    # Bottom Border 
-    graphics.set_pen(MATRIX_BORDER)
-    graphics.line(0, row, 32, row)
-
-    cu.update(graphics)
-
-
-def process_button(button):
-    initial_timestamp = time.ticks_ms()
-    if cu.is_pressed(button):
-        while cu.is_pressed(button):
-            time.sleep(0.01)
-    duration = time.ticks_ms() - initial_timestamp
-    return duration
-
-
-def display_date():
-    month, day = current_date()
-    date = f'{MONTHS[month-1]} {day:02}'
-
-    graphics.set_pen(ORANGE)
-    graphics.text(date, 3, 2, scale=1, spacing=1)
-
-
-def display_time():
-    global last_refresh_minute
-    _, _, _, _, hour, minute, _, _ = rtc.datetime()
-    write_time(graphics, DARK_GREEN, BACKGROUND, hour, minute, 7, 11)
-    last_refresh_minute = minute
-
-
-def toggle_day():
-    month, day = current_date()
-    print(f'Setting month={month}, day={day}')
-    date_matrix.toggle(month-1, day-1)
-    date_matrix.store()
-    display_date_matrix()
-
-
-def update_display():
-    clear_display(BACKGROUND)
-    display_date()
-    display_time()
-    display_date_matrix()
-    cu.update(graphics)
-
-
-def refresh_display():
-    global last_refresh_minute
-    _, _, _, _, _, current_minute, _, _ = rtc.datetime()
-    if current_minute != last_refresh_minute:
-        update_display()
-
-
-def loop():
-    duration = process_button(CosmicUnicorn.SWITCH_A)
-    if duration > 100:
-        if duration < 1000:
-            toggle_day()
-        else:
-            print(f'Long push {duration}')
-    
-    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        cu.adjust_brightness(+0.1)
-        update_display()
-
-    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        cu.adjust_brightness(-0.1)
-        update_display()
-
-    refresh_display()
-
-
-def initialise():
-    print(f'Initialising...')
-    cu.set_brightness(0.8)
-    graphics.set_font('bitmap8')
-    print(f'Restoring Matrix...')
-    date_matrix.restore()
-    print(f'Matrix Restored')
-    update_display()
-    print(f'Initialised')
-
-
-def clear_display(background=BLACK):
+def clear_display(background):
     graphics.set_pen(background)
     graphics.clear()
-    
 
-def display_wifi(brightness=0.5, foreground=WHITE, background=BLACK):
+
+def display_wifi(brightness=0.5, foreground=color.white(), background=color.black()):
     cu.set_brightness(brightness)
     clear_display(background)
 
@@ -226,6 +93,41 @@ def display_wifi(brightness=0.5, foreground=WHITE, background=BLACK):
     graphics.circle(centre_x, centre_y, 2)
 
     cu.update(graphics)
+
+
+def process_button(button):
+    initial_timestamp = time.ticks_ms()
+    if cu.is_pressed(button):
+        while cu.is_pressed(button):
+            time.sleep(0.01)
+    duration = time.ticks_ms() - initial_timestamp
+    return duration
+
+
+def loop():
+    duration = process_button(CosmicUnicorn.SWITCH_A)
+    if duration > 100:
+        if duration < 1000:
+            habit_calendar.button_pressed()
+        else:
+            print(f'Long push {duration}')
+    
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.1)
+        habit_calendar.update_display()
+
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.1)
+        habit_calendar.update_display()
+
+    habit_calendar.refresh_display()
+
+
+def initialise():
+    print(f'Initialising...')
+    cu.set_brightness(0.8)
+    graphics.set_font('bitmap8')
+    print(f'Initialised')
 
 
 if __name__ == "__main__":
