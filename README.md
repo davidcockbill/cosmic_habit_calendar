@@ -12,7 +12,7 @@ Install the MicroPico (Pico-W-Go) extension in order to connect to the Raspberry
 
 ## Wifi Setup
 
-Create 'wifi.py' with the following content:
+Create 'wifi_config.py' with the following content:
 
 ```
 WIFI_SSID = 'ssid'

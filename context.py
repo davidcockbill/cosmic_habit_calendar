@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import machine
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
@@ -23,11 +24,18 @@ class Context:
             'light_grey': self.graphics.create_pen(20, 20, 20),
         }
 
-        self.set_brightness(0.8)
         self.graphics.set_font('bitmap8')
 
     def datetime(self):
         return self.rtc.datetime()
+    
+    def process_button(self, button=CosmicUnicorn.SWITCH_A):
+        initial_timestamp = time.ticks_ms()
+        if self.cu.is_pressed(button):
+            while self.cu.is_pressed(button):
+                time.sleep(0.01)
+        duration = time.ticks_ms() - initial_timestamp
+        return duration
 
     def update_display(self):
         self.cu.update(self.graphics)
