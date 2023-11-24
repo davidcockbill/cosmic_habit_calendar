@@ -9,24 +9,34 @@ from habit_calendar import HabitCalendar
 class Controller:
     def __init__(self):
         self.context = Context()
-        self.habit_calendar = HabitCalendar(self.context)
-
+        self.page_idx = 0
+        self.page = [
+            HabitCalendar(self.context),
+        ]
+        
     def run(self):
         Wifi(self.context).sync_time()
         self.context.set_brightness(0.8);
         while True:
-            self.loop()
+            self._loop()
             time.sleep(0.01)
 
-    def loop(self):
+    def _loop(self):
         duration = self.context.process_button()
         if duration > 100:
             if duration < 1000:
-                self.habit_calendar.button_pressed()
+                self._current_page().button_pressed()
             else:
                 print(f'Long push {duration}')
+                self._increment_page()
 
-        self.habit_calendar.refresh_display()
+        self._current_page().refresh_display()
+
+    def _current_page(self):
+        return self.page[self.page_idx]
+    
+    def _increment_page(self):
+        self.page_idx = (self.page_idx + 1) % len(self.page)
 
 
 if __name__ == "__main__":
