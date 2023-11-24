@@ -4,6 +4,7 @@ import time
 from context import Context
 from wifi import Wifi
 from habit_calendar import HabitCalendar
+from fire import Fire
 
 
 class Controller:
@@ -12,6 +13,7 @@ class Controller:
         self.page_idx = 0
         self.page = [
             HabitCalendar(self.context),
+            Fire(self.context),
         ]
         
     def run(self):
@@ -19,7 +21,7 @@ class Controller:
         self.context.set_brightness(0.8);
         while True:
             self._loop()
-            time.sleep(0.01)
+            time.sleep(0.001)
 
     def _loop(self):
         duration = self.context.process_button()
