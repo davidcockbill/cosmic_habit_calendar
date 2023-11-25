@@ -21,11 +21,16 @@ class Fire:
             context.graphics.create_pen(220, 160, 0),
             context.graphics.create_pen(255, 255, 180)]
         
-    def refresh_display(self):
+    def enter(self):
+        print(f'Fire Entry')
         self.context.set_brightness(0.5)
+
+    def refresh_display(self):
         self._update()
         self._draw()
-
+        
+    def button_pressed(self):
+        pass
 
     @micropython.native  # noqa: F821
     def _update(self):

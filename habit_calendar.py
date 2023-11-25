@@ -14,15 +14,26 @@ class HabitCalendar:
         self.last_refresh_minute = int(0)
 
         self.restore_matrix()
+
+    def enter(self):
+        print(f'Habit Calendar Entry')
+        self.context.restore_brightness()
         self.update_display()
+
+    def update_display(self):
+        self.context.clear_display()
+        self.display_date()
+        self.display_time()
+        self.display_date_matrix()
+        self.context.update_display()
+
+    def button_pressed(self):
+        self.toggle_day()
 
     def restore_matrix(self):
         print(f'Restoring Matrix...')
         self.date_matrix.restore()
         print(f'Matrix Restored')
-
-    def button_pressed(self):
-        self.toggle_day()
 
     def toggle_day(self):
         month, day = self.current_date()
@@ -30,13 +41,6 @@ class HabitCalendar:
         self.date_matrix.toggle(month-1, day-1)
         self.date_matrix.store()
         self.display_date_matrix()
-
-    def update_display(self):
-        self.context.clear_display(self.background())
-        self.display_date()
-        self.display_time()
-        self.display_date_matrix()
-        self.context.update_display()
 
     def display_date(self):
         month, day = self.current_date()

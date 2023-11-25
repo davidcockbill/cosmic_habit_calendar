@@ -5,6 +5,7 @@ from context import Context
 from wifi import Wifi
 from habit_calendar import HabitCalendar
 from fire import Fire
+from brightness import Brightness
 
 
 class Controller:
@@ -14,11 +15,12 @@ class Controller:
         self.page = [
             HabitCalendar(self.context),
             Fire(self.context),
+            Brightness(self.context),
         ]
         
     def run(self):
         Wifi(self.context).sync_time()
-        self.context.set_brightness(0.8);
+        self.context.clear_display()
         while True:
             self._loop()
             time.sleep(0.001)
@@ -39,6 +41,7 @@ class Controller:
     
     def _increment_page(self):
         self.page_idx = (self.page_idx + 1) % len(self.page)
+        self._current_page().enter()
 
 
 if __name__ == "__main__":
