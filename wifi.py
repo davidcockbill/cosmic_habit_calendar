@@ -11,6 +11,7 @@ class Wifi:
         self.context = context
 
     def sync_time(self):
+        # self.context.set_brightness(80)
         last_timestamp = time.ticks_ms()
         wlan = network.WLAN(network.STA_IF)
         wlan.active(True)
@@ -26,7 +27,7 @@ class Wifi:
                     break
                 print(f'[{retry}] Waiting for wifi connection...')
 
-            brightness = [0.5, 0.4, 0.3, 0.2, 0.1, 0.2, 0.3, 0.4][retry%8]
+            brightness = [50, 40, 30, 20, 10, 20, 30, 40][retry%8]
             self._display_wifi(brightness=brightness)
             time.sleep(0.1)
             retry += 1
@@ -46,7 +47,7 @@ class Wifi:
         wlan.active(False)
 
 
-    def _display_wifi(self, brightness=0.5):
+    def _display_wifi(self, brightness=50):
         foreground=self.context.blue()
         background=self.context.black()
         self.context.set_brightness(brightness)

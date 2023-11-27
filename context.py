@@ -10,7 +10,6 @@ class Context:
         self.cu = CosmicUnicorn()
         self.graphics = PicoGraphics(DISPLAY)
         self.rtc = machine.RTC()
-        self.brightness = 0.8
 
         self.pens = {
             'white': self.graphics.create_pen(255, 255, 255),
@@ -26,6 +25,7 @@ class Context:
         }
 
         self.graphics.set_font('bitmap8')
+        self.store_brightness(80)
 
     def datetime(self):
         return self.rtc.datetime()
@@ -42,19 +42,21 @@ class Context:
         self.cu.update(self.graphics)
 
     def set_brightness(self, brightness):
-        self.cu.set_brightness(brightness)
+        self.cu.set_brightness(brightness / 100)
 
     def store_brightness(self, brightness):
         self.brightness = brightness
+        self.brightness = self.brightness if (self.brightness < 100) else 0
         self.set_brightness(self.brightness)
 
     def increment_brightness(self):
-        self.brightness += 0.1
-        self.brightness = self.brightness if (self.brightness < 1) else 0
-        self.set_brightness(self.brightness)
+        self.store_brightness(self.brightness + 10)
 
     def restore_brightness(self):
         self.set_brightness(self.brightness)
+
+    def get_brightness(self):
+        return self.brightness
 
     def clear_display(self, background=None):
         self.set_pen(self.black() if background is None else background)

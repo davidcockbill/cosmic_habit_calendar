@@ -21,7 +21,7 @@ class HabitCalendar:
         self.update_display()
 
     def update_display(self):
-        self.context.clear_display()
+        self.context.clear_display(self.background())
         self.display_date()
         self.display_time()
         self.display_date_matrix()

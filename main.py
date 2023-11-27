@@ -20,7 +20,7 @@ class Controller:
         
     def run(self):
         Wifi(self.context).sync_time()
-        self.context.clear_display()
+        self._current_page().enter()
         while True:
             self._loop()
             time.sleep(0.001)

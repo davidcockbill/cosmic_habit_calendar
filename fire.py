@@ -23,7 +23,7 @@ class Fire:
         
     def enter(self):
         print(f'Fire Entry')
-        self.context.set_brightness(0.5)
+        self.context.set_brightness(50)
 
     def refresh_display(self):
         self._update()
