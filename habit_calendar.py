@@ -2,7 +2,7 @@
 
 from date_matrix import DateMatrix
 from time_display import write_time
-
+import time
 
 MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -50,7 +50,18 @@ class HabitCalendar:
         self.context.graphics.text(date, 3, 2, scale=1, spacing=1)
 
     def display_time(self):
-        _, _, _, _, hour, minute, _, _ = self.context.datetime()
+        year = time.localtime()[0]
+        mar_change = time.mktime((year,3 ,(31-(int(5*year/4+4))%7),1,0,0,0,0,0))
+        oct_change = time.mktime((year,10,(31-(int(5*year/4+1))%7),1,0,0,0,0,0))
+        now = time.time()
+        if now < mar_change:
+            localtime = time.localtime(now)
+        elif now < oct_change:  
+            localtime = time.localtime(now+3600)
+        else:
+            localtime = time.localtime(now)
+        hour = localtime[3]
+        minute = localtime[4]
         write_time(self.context.graphics, self.context.dark_green(), self.background(), hour, minute, 7, 11)
         self.last_refresh_minute = minute
 
