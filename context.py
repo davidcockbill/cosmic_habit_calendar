@@ -18,7 +18,8 @@ class Context:
             'dark_blue': self.graphics.create_pen(0, 0, 20),
             'dark_background_blue': self.graphics.create_pen(0, 0, 10),
             'green': self.graphics.create_pen(0, 255, 0),
-            'dark_green': self.graphics.create_pen(0, 80, 0),
+            'light_green': self.graphics.create_pen(0, 80, 0),
+            'dark_green': self.graphics.create_pen(0, 40, 0),
             'pink': self.graphics.create_pen(255, 20, 147),
             'orange': self.graphics.create_pen(255, 102, 0),
             'light_grey': self.graphics.create_pen(20, 20, 20),
@@ -82,6 +83,9 @@ class Context:
 
     def green(self):
         return self.pens.get('green')
+    
+    def light_green(self):
+        return self.pens.get('light_green')
     
     def dark_green(self):
         return self.pens.get('dark_green')

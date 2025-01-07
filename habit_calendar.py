@@ -62,7 +62,7 @@ class HabitCalendar:
             localtime = time.localtime(now)
         hour = localtime[3]
         minute = localtime[4]
-        write_time(self.context.graphics, self.context.dark_green(), self.background(), hour, minute, 7, 11)
+        write_time(self.context.graphics, self.context.light_green(), self.background(), hour, minute, 7, 11)
         self.last_refresh_minute = minute
 
     def current_date(self):
@@ -105,10 +105,10 @@ class HabitCalendar:
             self.update_display()
 
     def on(self):
-        return self.context.blue()
+        return self.context.dark_green()
         
     def off(self):
-        return self.context.light_grey()
+        return self.context.black()
         
     def today_on(self):
         return self.context.green()
